@@ -1,0 +1,224 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum UserRole {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum SchoolType {
+  FOREIGN_LANGUAGE // 외고
+  INTERNATIONAL    // 국제고
+  AUTONOMOUS       // 자사고
+  SCIENCE_GIFTED   // 영재학교
+}
+
+enum QuestionCategory {
+  MOTIVATION    // 지원동기
+  CHARACTER     // 인성
+  ACTIVITY      // 활동
+  FUTURE_PLAN   // 미래계획
+  SITUATION     // 상황대처
+  COMPREHENSIVE // 종합
+}
+
+enum SessionStatus {
+  CREATED         // 자기소개서 입력됨
+  QUESTIONS_READY // AI 질문 생성 완료
+  IN_PROGRESS     // 면접 진행 중
+  PROCESSING      // STT/피드백 처리 중
+  COMPLETED       // 모든 처리 완료
+  FAILED          // 처리 실패
+}
+
+enum InviteCodeStatus {
+  ACTIVE
+  USED
+  EXPIRED
+  REVOKED
+}
+
+// ─────────────────────────────────────────────
+// MODELS
+// ─────────────────────────────────────────────
+
+model Academy {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique
+  address   String?
+  phone     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users       User[]
+  inviteCodes InviteCode[]
+
+  @@index([code])
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         UserRole @default(STUDENT)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  academyId String?
+  academy   Academy? @relation(fields: [academyId], references: [id])
+
+  teacherId String?
+  teacher   User?   @relation("TeacherStudents", fields: [teacherId], references: [id])
+  students  User[]  @relation("TeacherStudents")
+
+  personalStatements PersonalStatement[]
+  sessions           InterviewSession[]
+  usedInviteCode     InviteCode?         @relation("UsedBy")
+
+  @@index([academyId])
+  @@index([role])
+}
+
+model InviteCode {
+  id          String           @id @default(cuid())
+  code        String           @unique
+  status      InviteCodeStatus @default(ACTIVE)
+  expiresAt   DateTime
+  createdAt   DateTime         @default(now())
+  createdById String?
+
+  academyId String
+  academy   Academy @relation(fields: [academyId], references: [id])
+
+  usedById String?   @unique
+  usedBy   User?     @relation("UsedBy", fields: [usedById], references: [id])
+  usedAt   DateTime?
+
+  @@index([code])
+  @@index([academyId])
+}
+
+model PersonalStatement {
+  id         String     @id @default(cuid())
+  schoolType SchoolType
+  motivation String     @db.Text
+  strengths  String     @db.Text
+  weaknesses String     @db.Text
+  activities Json
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  sessions InterviewSession[]
+
+  @@index([userId])
+}
+
+model InterviewSession {
+  id               String        @id @default(cuid())
+  status           SessionStatus @default(CREATED)
+  startedAt        DateTime?
+  completedAt      DateTime?
+  totalDurationSec Int?
+  fullVideoS3Key   String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  userId              String
+  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  personalStatementId String
+  personalStatement   PersonalStatement @relation(fields: [personalStatementId], references: [id])
+
+  questions       Question[]
+  sessionFeedback SessionFeedback?
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Question {
+  id         String           @id @default(cuid())
+  orderIndex Int
+  category   QuestionCategory
+  text       String           @db.Text
+  createdAt  DateTime         @default(now())
+
+  sessionId String
+  session   InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  answer Answer?
+
+  @@unique([sessionId, orderIndex])
+  @@index([sessionId])
+}
+
+model Answer {
+  id            String   @id @default(cuid())
+  durationSec   Int?
+  transcript    String?  @db.Text
+  sttStatus     String   @default("pending")
+  sttConfidence Float?
+  recordedAt    DateTime @default(now())
+
+  videoS3Key String?
+  audioS3Key String?
+
+  questionId String   @unique
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  feedback AnswerFeedback?
+}
+
+model AnswerFeedback {
+  id                String @id @default(cuid())
+  contentScore      Int
+  logicScore        Int
+  completenessScore Int
+  expressionScore   Int
+  totalScore        Int
+
+  strengths      String @db.Text
+  improvements   String @db.Text
+  modelDirection String @db.Text
+
+  generatedAt DateTime @default(now())
+
+  answerId String @unique
+  answer   Answer @relation(fields: [answerId], references: [id], onDelete: Cascade)
+}
+
+model SessionFeedback {
+  id                   String @id @default(cuid())
+  avgContentScore      Float
+  avgLogicScore        Float
+  avgCompletenessScore Float
+  avgExpressionScore   Float
+  avgTotalScore        Float
+
+  overallSummary      String @db.Text
+  overallStrengths    String @db.Text
+  overallImprovements String @db.Text
+
+  generatedAt DateTime @default(now())
+
+  sessionId String           @unique
+  session   InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
