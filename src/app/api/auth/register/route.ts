@@ -7,7 +7,7 @@ const registerSchema = z.object({
   name: z.string().min(2).max(20),
   email: z.string().email(),
   password: z.string().min(6),
-  inviteCode: z.string().min(1),
+  academyCode: z.string().min(1),
 });
 
 export async function POST(req: Request) {
@@ -17,15 +17,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "입력값이 올바르지 않습니다." }, { status: 400 });
   }
 
-  const { name, email, password, inviteCode } = parsed.data;
+  const { name, email, password, academyCode } = parsed.data;
 
-  const invite = await prisma.inviteCode.findUnique({
-    where: { code: inviteCode },
-    include: { academy: true },
+  const academy = await prisma.academy.findUnique({
+    where: { code: academyCode.trim().toUpperCase() },
   });
 
-  if (!invite || invite.status !== "ACTIVE" || invite.expiresAt < new Date()) {
-    return NextResponse.json({ error: "유효하지 않거나 만료된 초대 코드입니다." }, { status: 400 });
+  if (!academy || !academy.isActive) {
+    return NextResponse.json(
+      { error: "존재하지 않거나 비활성화된 학원 코드입니다." },
+      { status: 400 }
+    );
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });
@@ -35,20 +37,18 @@ export async function POST(req: Request) {
 
   const passwordHash = await bcrypt.hash(password, 12);
 
-  const user = await prisma.user.create({
+  await prisma.user.create({
     data: {
       name,
       email,
       passwordHash,
       role: "STUDENT",
-      academyId: invite.academyId,
+      academyId: academy.id,
     },
   });
 
-  await prisma.inviteCode.update({
-    where: { id: invite.id },
-    data: { status: "USED", usedById: user.id, usedAt: new Date() },
-  });
-
-  return NextResponse.json({ success: true }, { status: 201 });
+  return NextResponse.json(
+    { success: true, academyName: academy.name },
+    { status: 201 }
+  );
 }

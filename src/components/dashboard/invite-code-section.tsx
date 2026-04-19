@@ -1,115 +1,90 @@
 "use client";
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Copy, Plus, KeyRound } from "lucide-react";
-
-interface InviteCode {
-  id: string;
-  code: string;
-  status: string;
-  expiresAt: string;
-}
+import { Copy, KeyRound, Check } from "lucide-react";
 
 export function InviteCodeSection({ academyId }: { academyId: string }) {
-  const [codes, setCodes] = useState<InviteCode[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [loaded, setLoaded] = useState(false);
+  const [code, setCode] = useState<string>("");
+  const [academyName, setAcademyName] = useState<string>("");
+  const [copied, setCopied] = useState(false);
 
-  async function loadCodes() {
-    const res = await fetch(`/api/academies/${academyId}/invite-codes`);
-    const data = await res.json();
-    setCodes(data.codes ?? []);
-    setLoaded(true);
-  }
-
-  async function generateCode() {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/academies/${academyId}/invite-codes`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ expiresInDays: 30 }),
-      });
-      const data = await res.json();
-      toast.success(`초대 코드 생성: ${data.inviteCode.code}`);
-      loadCodes();
-    } catch {
-      toast.error("코드 생성에 실패했습니다.");
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch(`/api/academies/${academyId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setCode(data.code ?? "");
+          setAcademyName(data.name ?? "");
+        }
+      } catch {
+        // silent
+      }
     }
-  }
+    load();
+  }, [academyId]);
 
-  function copyCode(code: string) {
+  function copyCode() {
+    if (!code) return;
     navigator.clipboard.writeText(code);
-    toast.success("초대 코드가 복사되었습니다.");
+    setCopied(true);
+    toast.success("학원 코드가 복사되었습니다.");
+    setTimeout(() => setCopied(false), 2000);
   }
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
-            <KeyRound className="w-4 h-4" />
-            학생 초대 코드
-          </CardTitle>
-          <div className="flex gap-2">
-            {!loaded && (
-              <Button variant="ghost" size="sm" onClick={loadCodes} className="text-xs h-7">
-                목록 보기
-              </Button>
-            )}
-            <Button size="sm" onClick={generateCode} disabled={loading} className="text-xs h-7">
-              <Plus className="w-3 h-3 mr-1" />
-              {loading ? "생성 중..." : "코드 생성"}
-            </Button>
-          </div>
-        </div>
+        <CardTitle className="text-base flex items-center gap-2">
+          <KeyRound className="w-4 h-4 text-pink-500" />
+          학원 코드
+        </CardTitle>
+        <CardDescription>
+          학생이 회원가입 시 이 코드를 입력하면 <span className="font-medium text-gray-700">{academyName}</span> 소속 학생으로 등록됩니다.
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        {!loaded ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            &quot;목록 보기&quot;를 클릭하면 기존 코드를 확인할 수 있습니다.
-          </p>
-        ) : codes.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            발급된 초대 코드가 없습니다.
-          </p>
-        ) : (
-          <div className="space-y-2 max-h-60 overflow-y-auto">
-            {codes.map((c) => (
-              <div key={c.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                <div>
-                  <code className="text-sm font-mono font-bold">{c.code}</code>
-                  <p className="text-xs text-muted-foreground">
-                    만료: {new Date(c.expiresAt).toLocaleDateString("ko-KR")}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge
-                    className={`text-xs ${c.status === "ACTIVE" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
-                  >
-                    {c.status === "ACTIVE" ? "사용 가능" : c.status === "USED" ? "사용됨" : "만료"}
-                  </Badge>
-                  {c.status === "ACTIVE" && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 w-7 p-0"
-                      onClick={() => copyCode(c.code)}
-                    >
-                      <Copy className="w-3 h-3" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ))}
+        <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl border border-pink-100">
+          <div className="flex-1">
+            <p className="text-[11px] text-pink-500 font-medium uppercase tracking-wider mb-1">
+              학원 고유 코드
+            </p>
+            <p className="text-2xl font-mono font-bold text-pink-700 tracking-widest">
+              {code || "—"}
+            </p>
           </div>
-        )}
+          <Button
+            onClick={copyCode}
+            disabled={!code}
+            variant="outline"
+            size="sm"
+            className="shrink-0 bg-white border-pink-200 text-pink-600 hover:bg-pink-50"
+          >
+            {copied ? (
+              <>
+                <Check className="w-4 h-4 mr-1" />
+                복사됨
+              </>
+            ) : (
+              <>
+                <Copy className="w-4 h-4 mr-1" />
+                복사
+              </>
+            )}
+          </Button>
+        </div>
+
+        <div className="mt-4 p-3 bg-gray-50 rounded-lg text-xs text-gray-600 leading-relaxed">
+          <p className="font-medium text-gray-700 mb-1">학생 가입 안내 방법</p>
+          <ol className="space-y-1 list-decimal list-inside">
+            <li>학생에게 이 코드를 공유합니다</li>
+            <li>학생이 <span className="font-mono text-pink-600">/register</span> 페이지에서 코드와 함께 가입</li>
+            <li>자동으로 학원 소속 학생으로 등록됨</li>
+          </ol>
+        </div>
       </CardContent>
     </Card>
   );

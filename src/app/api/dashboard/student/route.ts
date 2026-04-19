@@ -12,7 +12,7 @@ export async function GET() {
     where: { userId, status: "COMPLETED" },
     include: {
       sessionFeedback: true,
-      personalStatement: { select: { schoolType: true } },
+      personalStatement: { select: { targetSchool: true } },
     },
     orderBy: { completedAt: "asc" },
   });
@@ -26,14 +26,14 @@ export async function GET() {
       logic: Math.round(s.sessionFeedback!.avgLogicScore),
       completeness: Math.round(s.sessionFeedback!.avgCompletenessScore),
       expression: Math.round(s.sessionFeedback!.avgExpressionScore),
-      schoolType: s.personalStatement.schoolType,
+      targetSchool: s.personalStatement.targetSchool,
     }));
 
   const recentSessions = await prisma.interviewSession.findMany({
     where: { userId },
     include: {
       sessionFeedback: { select: { avgTotalScore: true } },
-      personalStatement: { select: { schoolType: true } },
+      personalStatement: { select: { targetSchool: true } },
     },
     orderBy: { createdAt: "desc" },
     take: 10,

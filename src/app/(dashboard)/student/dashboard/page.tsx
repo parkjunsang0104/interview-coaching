@@ -6,22 +6,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
 import { DashboardCharts } from "@/components/dashboard/charts";
-import { Video, Clock, TrendingUp } from "lucide-react";
+import { StatsOverview } from "@/components/dashboard/stats-overview";
+import { Video, History, ChevronRight, Calendar, Sparkles } from "lucide-react";
+import { getSchoolShortName } from "@/lib/school-data";
 
-const SCHOOL_TYPE_LABELS: Record<string, string> = {
-  FOREIGN_LANGUAGE: "외고",
-  INTERNATIONAL: "국제고",
-  AUTONOMOUS: "자사고",
-  SCIENCE_GIFTED: "영재학교",
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  CREATED: "생성됨",
-  QUESTIONS_READY: "질문 준비",
-  IN_PROGRESS: "진행 중",
-  PROCESSING: "처리 중",
-  COMPLETED: "완료",
-  FAILED: "실패",
+const STATUS_META: Record<string, { label: string; color: string }> = {
+  CREATED: { label: "시작 전", color: "bg-gray-100 text-gray-600" },
+  QUESTIONS_READY: { label: "질문 준비", color: "bg-yellow-100 text-yellow-700" },
+  IN_PROGRESS: { label: "진행 중", color: "bg-pink-100 text-pink-600" },
+  PROCESSING: { label: "분석 중", color: "bg-purple-100 text-purple-700" },
+  COMPLETED: { label: "완료", color: "bg-green-100 text-green-700" },
+  FAILED: { label: "실패", color: "bg-red-100 text-red-700" },
 };
 
 export default async function StudentDashboardPage() {
@@ -30,15 +25,16 @@ export default async function StudentDashboardPage() {
 
   const userId = session.user.id;
 
-  const [allSessions, completedSessions] = await Promise.all([
+  const [totalCount, recentSessions, completedSessions] = await Promise.all([
+    prisma.interviewSession.count({ where: { userId } }),
     prisma.interviewSession.findMany({
       where: { userId },
       include: {
         sessionFeedback: { select: { avgTotalScore: true } },
-        personalStatement: { select: { schoolType: true } },
+        personalStatement: { select: { targetSchool: true } },
       },
       orderBy: { createdAt: "desc" },
-      take: 8,
+      take: 10,
     }),
     prisma.interviewSession.findMany({
       where: { userId, status: "COMPLETED" },
@@ -58,146 +54,187 @@ export default async function StudentDashboardPage() {
       표현력: Math.round(s.sessionFeedback!.avgExpressionScore),
     }));
 
+  const scored = completedSessions.filter((s) => s.sessionFeedback);
   const avgScore =
-    completedSessions.length > 0
+    scored.length > 0
       ? Math.round(
-          completedSessions
-            .filter((s) => s.sessionFeedback)
-            .reduce((sum, s) => sum + s.sessionFeedback!.avgTotalScore, 0) /
-            completedSessions.filter((s) => s.sessionFeedback).length
+          scored.reduce((sum, s) => sum + s.sessionFeedback!.avgTotalScore, 0) /
+            scored.length
         )
+      : null;
+
+  const maxScore =
+    scored.length > 0
+      ? Math.round(Math.max(...scored.map((s) => s.sessionFeedback!.avgTotalScore)))
       : null;
 
   return (
     <div>
+      {/* 헤더 */}
       <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold">대시보드</h1>
-          <p className="text-muted-foreground mt-1">안녕하세요, {session.user.name}님!</p>
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 bg-gradient-to-br from-pink-400 to-rose-500 rounded-2xl flex items-center justify-center shadow-sm">
+            <Sparkles className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">
+              안녕하세요, {session.user.name}님!
+            </h1>
+            <p className="text-sm text-pink-500 mt-0.5">오늘도 멋진 하루 보내세요 ✨</p>
+          </div>
         </div>
         <Link href="/interview/new">
-          <Button className="flex items-center gap-2">
+          <Button className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-md shadow-pink-200/50 h-11 px-5">
             <Video className="w-4 h-4" />
             새 면접 시작
           </Button>
         </Link>
       </div>
 
-      {/* 통계 카드 */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Video className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{allSessions.length}</p>
-                <p className="text-xs text-muted-foreground">전체 면접 횟수</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{avgScore ?? "-"}</p>
-                <p className="text-xs text-muted-foreground">평균 종합 점수</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Clock className="w-5 h-5 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{completedSessions.length}</p>
-                <p className="text-xs text-muted-foreground">완료된 면접</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* 시각화 통계 (1~3번 항목) */}
+      <StatsOverview
+        totalCount={totalCount}
+        completedCount={scored.length}
+        avgScore={avgScore}
+        maxScore={maxScore}
+      />
 
       {/* 점수 추이 차트 */}
       {scoreHistory.length > 0 ? (
-        <Card className="mb-8">
+        <Card className="mb-8 border-pink-100/50 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-base">점수 추이</CardTitle>
+            <CardTitle className="text-base flex items-center gap-2">
+              <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
+                <Video className="w-4 h-4 text-pink-500" />
+              </div>
+              점수 추이
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <DashboardCharts data={scoreHistory} />
           </CardContent>
         </Card>
       ) : (
-        <Card className="mb-8 border-dashed">
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <Video className="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p>아직 완료된 면접이 없습니다.</p>
-            <p className="text-sm mt-1">첫 번째 면접을 시작해보세요!</p>
+        <Card className="mb-8 border-dashed border-pink-200 bg-pink-50/30">
+          <CardContent className="py-12 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-pink-100 rounded-full flex items-center justify-center">
+              <Video className="w-8 h-8 text-pink-400" />
+            </div>
+            <p className="text-gray-700 font-medium">아직 완료된 면접이 없습니다</p>
+            <p className="text-sm text-pink-500 mt-1">첫 번째 면접을 시작해보세요!</p>
           </CardContent>
         </Card>
       )}
 
-      {/* 최근 면접 기록 */}
-      <Card>
+      {/* 4번 항목: 이전/최근 면접 기록 History */}
+      <Card className="border-pink-100/50 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-base">최근 면접 기록</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
+                <History className="w-4 h-4 text-pink-500" />
+              </div>
+              면접 기록 History
+            </CardTitle>
+            <Link href="/student/sessions">
+              <Button variant="ghost" size="sm" className="text-pink-500 hover:text-pink-600 hover:bg-pink-50 text-xs gap-1">
+                전체 보기 <ChevronRight className="w-3 h-3" />
+              </Button>
+            </Link>
+          </div>
         </CardHeader>
         <CardContent>
-          {allSessions.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-6">
-              면접 기록이 없습니다.
-            </p>
+          {recentSessions.length === 0 ? (
+            <div className="text-center py-8">
+              <Calendar className="w-10 h-10 mx-auto mb-3 text-pink-200" />
+              <p className="text-sm text-muted-foreground">면접 기록이 없습니다</p>
+            </div>
           ) : (
-            <div className="space-y-2">
-              {allSessions.map((s) => (
-                <div
-                  key={s.id}
-                  className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0"
-                >
-                  <div className="flex items-center gap-3">
-                    <Badge variant="outline" className="text-xs">
-                      {SCHOOL_TYPE_LABELS[s.personalStatement.schoolType]}
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">
-                      {new Date(s.createdAt).toLocaleDateString("ko-KR")}
-                    </span>
-                    <Badge
-                      className={`text-xs ${s.status === "COMPLETED" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}
-                    >
-                      {STATUS_LABELS[s.status]}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {s.sessionFeedback && (
-                      <span className="text-sm font-bold text-blue-700">
-                        {Math.round(s.sessionFeedback.avgTotalScore)}점
-                      </span>
+            <div className="space-y-2.5">
+              {recentSessions.map((s, idx) => {
+                const meta = STATUS_META[s.status] ?? STATUS_META.CREATED;
+                const score = s.sessionFeedback
+                  ? Math.round(s.sessionFeedback.avgTotalScore)
+                  : null;
+                const isHighest = maxScore !== null && score === maxScore;
+
+                return (
+                  <div
+                    key={s.id}
+                    className="group flex items-center gap-4 p-3.5 rounded-xl border border-gray-100 hover:border-pink-200 hover:bg-pink-50/30 transition-all"
+                  >
+                    {/* 회차 */}
+                    <div className="flex flex-col items-center gap-0.5 shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-100 to-rose-100 flex items-center justify-center text-pink-700 font-bold text-sm">
+                        {recentSessions.length - idx}
+                      </div>
+                      <span className="text-[10px] text-gray-400">회차</span>
+                    </div>
+
+                    {/* 메인 정보 */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="text-sm font-semibold text-gray-800">
+                          {getSchoolShortName(s.personalStatement.targetSchool)}
+                        </span>
+                        <Badge className={`text-[10px] border-0 ${meta.color}`}>
+                          {meta.label}
+                        </Badge>
+                        {isHighest && (
+                          <Badge className="text-[10px] border-0 bg-amber-100 text-amber-700">
+                            🏆 최고점
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <Calendar className="w-3 h-3" />
+                        {new Date(s.createdAt).toLocaleDateString("ko-KR", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </p>
+                    </div>
+
+                    {/* 점수 */}
+                    {score !== null && (
+                      <div className="text-right shrink-0">
+                        <p className="text-2xl font-bold text-pink-600 leading-none">
+                          {score}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">종합 점수</p>
+                      </div>
                     )}
-                    {s.status === "COMPLETED" ? (
-                      <Link href={`/interview/${s.id}/feedback`}>
-                        <Button variant="outline" size="sm" className="text-xs">
-                          결과 보기
-                        </Button>
-                      </Link>
-                    ) : s.status === "QUESTIONS_READY" ? (
-                      <Link href={`/interview/${s.id}/session`}>
-                        <Button size="sm" className="text-xs">
-                          이어하기
-                        </Button>
-                      </Link>
-                    ) : null}
+
+                    {/* 액션 */}
+                    <div className="shrink-0">
+                      {s.status === "COMPLETED" ? (
+                        <Link href={`/interview/${s.id}/feedback`}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs border-pink-200 text-pink-600 hover:bg-pink-50 hover:border-pink-300"
+                          >
+                            결과 <ChevronRight className="w-3 h-3 ml-0.5" />
+                          </Button>
+                        </Link>
+                      ) : s.status === "QUESTIONS_READY" || s.status === "IN_PROGRESS" ? (
+                        <Link href={`/interview/${s.id}/session`}>
+                          <Button size="sm" className="text-xs">
+                            이어하기
+                          </Button>
+                        </Link>
+                      ) : s.status === "CREATED" ? (
+                        <Link href={`/interview/${s.id}/questions`}>
+                          <Button variant="outline" size="sm" className="text-xs">
+                            질문 생성
+                          </Button>
+                        </Link>
+                      ) : null}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>

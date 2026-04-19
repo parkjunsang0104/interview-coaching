@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { generateAnswerFeedback } from "@/lib/claude";
-import type { SchoolType } from "@/generated/prisma/client";
 
 export const maxDuration = 60;
 
@@ -29,13 +28,13 @@ export async function POST(
   if (!answer) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (answer.feedback) return NextResponse.json({ feedback: answer.feedback });
 
-  const schoolType = answer.question.session.personalStatement.schoolType as SchoolType;
+  const targetSchool = answer.question.session.personalStatement.targetSchool;
 
   const result = await generateAnswerFeedback({
     question: answer.question.text,
     category: answer.question.category,
     transcript: answer.transcript ?? "",
-    schoolType,
+    targetSchool,
   });
 
   const feedback = await prisma.answerFeedback.create({

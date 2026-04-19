@@ -19,7 +19,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  MOTIVATION: "bg-blue-100 text-blue-700",
+  MOTIVATION: "bg-pink-100 text-pink-600",
   CHARACTER: "bg-green-100 text-green-700",
   ACTIVITY: "bg-yellow-100 text-yellow-700",
   FUTURE_PLAN: "bg-purple-100 text-purple-700",
@@ -43,32 +43,41 @@ export default function QuestionsPage({
   const router = useRouter();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  async function load() {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}/questions`, {
+        method: "POST",
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        const msg = json.error ?? "질문 생성에 실패했습니다.";
+        toast.error(msg);
+        setError(msg);
+        return;
+      }
+      setQuestions(json.questions ?? []);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "오류가 발생했습니다.";
+      toast.error(msg);
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch(`/api/sessions/${sessionId}/questions`, {
-          method: "POST",
-        });
-        const json = await res.json();
-        if (!res.ok) {
-          toast.error("질문 생성에 실패했습니다.");
-          return;
-        }
-        setQuestions(json.questions);
-      } catch {
-        toast.error("오류가 발생했습니다.");
-      } finally {
-        setLoading(false);
-      }
-    }
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
   if (loading) {
     return (
       <div className="max-w-2xl mx-auto text-center py-20">
-        <Loader2 className="w-10 h-10 animate-spin text-blue-600 mx-auto mb-4" />
+        <Loader2 className="w-10 h-10 animate-spin text-pink-500 mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">AI가 면접 질문을 생성하고 있습니다</h2>
         <p className="text-muted-foreground">자기소개서를 분석하여 맞춤 질문을 만드는 중입니다...</p>
       </div>
@@ -89,8 +98,8 @@ export default function QuestionsPage({
           <span className="w-6 h-6 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center text-xs font-bold">1</span>
           <span className="text-gray-400">자기소개서 입력</span>
           <span className="text-gray-300">›</span>
-          <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
-          <span className="font-medium text-blue-600">질문 확인</span>
+          <span className="w-6 h-6 bg-pink-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+          <span className="font-medium text-pink-500">질문 확인</span>
           <span className="text-gray-300">›</span>
           <span>면접 진행</span>
           <span className="text-gray-300">›</span>
@@ -101,6 +110,16 @@ export default function QuestionsPage({
           자기소개서를 분석하여 6개의 맞춤 질문이 생성되었습니다. 미리 확인 후 면접을 시작하세요.
         </p>
       </div>
+
+      {error && questions.length === 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <p className="text-sm font-medium text-red-800 mb-2">질문 생성에 실패했습니다</p>
+          <p className="text-xs text-red-600 mb-3 whitespace-pre-wrap">{error}</p>
+          <Button size="sm" variant="outline" onClick={load}>
+            다시 시도
+          </Button>
+        </div>
+      )}
 
       <div className="space-y-3 mb-8">
         {questions.map((q) => (
@@ -124,9 +143,9 @@ export default function QuestionsPage({
         ))}
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-sm text-blue-800">
+      <div className="bg-pink-50 border border-pink-200 rounded-lg p-4 mb-6 text-sm text-pink-700">
         <p className="font-medium mb-1">면접 시작 전 안내</p>
-        <ul className="space-y-1 text-blue-700 text-xs">
+        <ul className="space-y-1 text-pink-600 text-xs">
           <li>• 카메라와 마이크 사용 권한이 필요합니다</li>
           <li>• 각 질문에 1~3분 이내로 답변하세요</li>
           <li>• 조용하고 밝은 장소에서 진행하세요</li>
@@ -136,6 +155,7 @@ export default function QuestionsPage({
       <Button
         size="lg"
         className="w-full"
+        disabled={questions.length === 0}
         onClick={() => router.push(`/interview/${sessionId}/session`)}
       >
         면접 시작하기

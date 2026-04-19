@@ -17,12 +17,7 @@ enum UserRole {
   ADMIN
 }
 
-enum SchoolType {
-  FOREIGN_LANGUAGE // 외고
-  INTERNATIONAL    // 국제고
-  AUTONOMOUS       // 자사고
-  SCIENCE_GIFTED   // 영재학교
-}
+// SchoolType은 school-data.ts의 학교 ID 문자열로 대체됨
 
 enum QuestionCategory {
   MOTIVATION    // 지원동기
@@ -74,6 +69,7 @@ model User {
   email        String   @unique
   passwordHash String
   name         String
+  middleSchool String?
   role         UserRole @default(STUDENT)
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
@@ -114,14 +110,15 @@ model InviteCode {
 }
 
 model PersonalStatement {
-  id         String     @id @default(cuid())
-  schoolType SchoolType
-  motivation String     @db.Text
-  strengths  String     @db.Text
-  weaknesses String     @db.Text
-  activities Json
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  id           String   @id @default(cuid())
+  targetSchool String
+  selfDirected String   @db.Text
+  motivation   String   @db.Text
+  futurePlan   String   @db.Text
+  character    String   @db.Text
+  activities   Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)

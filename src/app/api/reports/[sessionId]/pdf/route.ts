@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getSchoolName } from "@/lib/school-data";
 import {
   Document,
   Page,
@@ -13,13 +14,6 @@ import {
 import React from "react";
 
 export const maxDuration = 60;
-
-const SCHOOL_TYPE_LABELS: Record<string, string> = {
-  FOREIGN_LANGUAGE: "외국어고등학교(외고)",
-  INTERNATIONAL: "국제고등학교(국제고)",
-  AUTONOMOUS: "자율형사립고(자사고)",
-  SCIENCE_GIFTED: "과학영재학교",
-};
 
 const CATEGORY_LABELS: Record<string, string> = {
   MOTIVATION: "지원동기",
@@ -88,7 +82,7 @@ export async function GET(
   }
 
   const ps = interviewSession.personalStatement;
-  const schoolLabel = SCHOOL_TYPE_LABELS[ps.schoolType] ?? ps.schoolType;
+  const schoolLabel = getSchoolName(ps.targetSchool);
   const dateStr = new Date(interviewSession.createdAt).toLocaleDateString("ko-KR");
 
   const doc = React.createElement(

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
 import { Users, Video, TrendingUp, ClipboardList } from "lucide-react";
 import { InviteCodeSection } from "@/components/dashboard/invite-code-section";
+import { getSchoolShortName } from "@/lib/school-data";
 
 export default async function TeacherDashboardPage() {
   const session = await auth();
@@ -31,7 +32,7 @@ export default async function TeacherDashboardPage() {
       where: { user: { academyId } },
       include: {
         user: { select: { name: true } },
-        personalStatement: { select: { schoolType: true } },
+        personalStatement: { select: { targetSchool: true } },
         sessionFeedback: { select: { avgTotalScore: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -54,13 +55,6 @@ export default async function TeacherDashboardPage() {
         )
       : null;
 
-  const SCHOOL_TYPE_LABELS: Record<string, string> = {
-    FOREIGN_LANGUAGE: "외고",
-    INTERNATIONAL: "국제고",
-    AUTONOMOUS: "자사고",
-    SCIENCE_GIFTED: "영재학교",
-  };
-
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
@@ -81,8 +75,8 @@ export default async function TeacherDashboardPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Users className="w-5 h-5 text-blue-600" />
+              <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
+                <Users className="w-5 h-5 text-pink-500" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{studentCount}</p>
@@ -141,7 +135,7 @@ export default async function TeacherDashboardPage() {
                       <p className="text-sm font-medium">{s.user.name}</p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <Badge variant="outline" className="text-xs">
-                          {SCHOOL_TYPE_LABELS[s.personalStatement.schoolType]}
+                          {getSchoolShortName(s.personalStatement.targetSchool)}
                         </Badge>
                         <span className="text-xs text-muted-foreground">
                           {new Date(s.createdAt).toLocaleDateString("ko-KR")}
@@ -150,7 +144,7 @@ export default async function TeacherDashboardPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       {s.sessionFeedback && (
-                        <span className="text-sm font-bold text-blue-700">
+                        <span className="text-sm font-bold text-pink-600">
                           {Math.round(s.sessionFeedback.avgTotalScore)}점
                         </span>
                       )}

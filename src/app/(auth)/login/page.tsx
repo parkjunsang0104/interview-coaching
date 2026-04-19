@@ -51,7 +51,7 @@ export default function LoginPage() {
   return (
     <Card className="shadow-lg">
       <CardHeader className="text-center space-y-2">
-        <div className="mx-auto w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mb-2">
+        <div className="mx-auto w-12 h-12 bg-pink-500 rounded-xl flex items-center justify-center mb-2">
           <span className="text-white text-xl font-bold">면</span>
         </div>
         <CardTitle className="text-2xl">로그인</CardTitle>
@@ -87,7 +87,7 @@ export default function LoginPage() {
         </form>
         <p className="text-center text-sm text-muted-foreground mt-4">
           계정이 없으신가요?{" "}
-          <Link href="/register" className="text-blue-600 hover:underline font-medium">
+          <Link href="/register" className="text-pink-500 hover:underline font-medium">
             회원가입
           </Link>
         </p>

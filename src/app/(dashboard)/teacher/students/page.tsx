@@ -1,10 +1,9 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
+import { Users } from "lucide-react";
+import { StudentsList, type StudentRow } from "@/components/dashboard/students-list";
 
 export default async function TeacherStudentsPage() {
   const session = await auth();
@@ -25,84 +24,64 @@ export default async function TeacherStudentsPage() {
     where: { academyId, role: "STUDENT" },
     include: {
       sessions: {
-        where: { status: "COMPLETED" },
-        include: { sessionFeedback: { select: { avgTotalScore: true } } },
-        orderBy: { completedAt: "desc" },
-        take: 1,
+        select: {
+          status: true,
+          createdAt: true,
+          completedAt: true,
+          sessionFeedback: { select: { avgTotalScore: true } },
+        },
+        orderBy: { createdAt: "desc" },
       },
-      _count: { select: { sessions: true } },
     },
-    orderBy: { name: "asc" },
+  });
+
+  const rows: StudentRow[] = students.map((u) => {
+    const completed = u.sessions.filter(
+      (s) => s.status === "COMPLETED" && s.sessionFeedback
+    );
+    const scores = completed.map((s) => s.sessionFeedback!.avgTotalScore);
+
+    const latestAt = u.sessions[0]
+      ? (u.sessions[0].completedAt ?? u.sessions[0].createdAt).toISOString()
+      : null;
+
+    return {
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      isActive: u.isActive,
+      createdAt: u.createdAt.toISOString(),
+      totalSessions: u.sessions.length,
+      completedSessions: completed.length,
+      latestInterviewAt: latestAt,
+      avgScore:
+        scores.length > 0
+          ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+          : null,
+      maxScore: scores.length > 0 ? Math.round(Math.max(...scores)) : null,
+    };
   });
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold">학생 관리</h1>
-        <p className="text-muted-foreground mt-1">
-          총 {students.length}명의 학생이 등록되어 있습니다.
-        </p>
+      <div className="flex items-center gap-3 mb-8">
+        <div className="w-11 h-11 bg-gradient-to-br from-pink-400 to-rose-500 rounded-2xl flex items-center justify-center shadow-sm">
+          <Users className="w-5 h-5 text-white" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">학생 관리</h1>
+          <p className="text-sm text-pink-500 mt-0.5">
+            총 {rows.length}명의 학생이 등록되어 있습니다
+          </p>
+        </div>
       </div>
 
-      <Card>
+      <Card className="border-pink-100/50 shadow-sm">
         <CardHeader>
           <CardTitle className="text-base">학생 목록</CardTitle>
         </CardHeader>
         <CardContent>
-          {students.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              등록된 학생이 없습니다. 초대 코드를 발급하여 학생을 초대하세요.
-            </p>
-          ) : (
-            <div className="divide-y divide-gray-100">
-              {students.map((student) => {
-                const latestScore =
-                  student.sessions[0]?.sessionFeedback?.avgTotalScore;
-                return (
-                  <div
-                    key={student.id}
-                    className="flex items-center justify-between py-4"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-gray-600">
-                          {student.name.charAt(0)}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="font-medium">{student.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {student.email}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="text-sm text-muted-foreground">
-                          면접 {student._count.sessions}회
-                        </p>
-                        {latestScore && (
-                          <p className="text-sm font-bold text-blue-700">
-                            최근 {Math.round(latestScore)}점
-                          </p>
-                        )}
-                      </div>
-                      <Badge
-                        className={`text-xs ${student.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
-                      >
-                        {student.isActive ? "활성" : "비활성"}
-                      </Badge>
-                      <Link href={`/teacher/students/${student.id}`}>
-                        <Button variant="outline" size="sm" className="text-xs">
-                          상세 보기
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          <StudentsList students={rows} />
         </CardContent>
       </Card>
     </div>

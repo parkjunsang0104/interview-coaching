@@ -26,7 +26,7 @@ export default function RegisterPage() {
       name: (form.elements.namedItem("name") as HTMLInputElement).value,
       email: (form.elements.namedItem("email") as HTMLInputElement).value,
       password: (form.elements.namedItem("password") as HTMLInputElement).value,
-      inviteCode: (form.elements.namedItem("inviteCode") as HTMLInputElement).value,
+      academyCode: (form.elements.namedItem("academyCode") as HTMLInputElement).value,
     };
 
     setLoading(true);
@@ -43,7 +43,7 @@ export default function RegisterPage() {
         return;
       }
 
-      toast.success("회원가입이 완료됐습니다! 로그인해주세요.");
+      toast.success(`${json.academyName} 학원 소속으로 가입되었습니다. 로그인해주세요.`);
       router.push("/login");
     } catch {
       toast.error("오류가 발생했습니다. 다시 시도해주세요.");
@@ -55,20 +55,21 @@ export default function RegisterPage() {
   return (
     <Card className="shadow-lg">
       <CardHeader className="text-center space-y-2">
-        <div className="mx-auto w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mb-2">
+        <div className="mx-auto w-12 h-12 bg-pink-500 rounded-xl flex items-center justify-center mb-2">
           <span className="text-white text-xl font-bold">면</span>
         </div>
         <CardTitle className="text-2xl">회원가입</CardTitle>
-        <CardDescription>학원에서 받은 초대 코드로 가입하세요</CardDescription>
+        <CardDescription>학원에서 안내받은 학원 코드로 가입하세요</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="inviteCode">초대 코드</Label>
+            <Label htmlFor="academyCode">학원 코드</Label>
             <Input
-              id="inviteCode"
-              name="inviteCode"
-              placeholder="학원에서 받은 초대 코드"
+              id="academyCode"
+              name="academyCode"
+              placeholder="예: DEMO001"
+              className="uppercase tracking-wider font-mono"
               required
             />
           </div>
@@ -103,7 +104,7 @@ export default function RegisterPage() {
         </form>
         <p className="text-center text-sm text-muted-foreground mt-4">
           이미 계정이 있으신가요?{" "}
-          <Link href="/login" className="text-blue-600 hover:underline font-medium">
+          <Link href="/login" className="text-pink-500 hover:underline font-medium">
             로그인
           </Link>
         </p>

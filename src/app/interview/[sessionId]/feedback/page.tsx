@@ -29,7 +29,7 @@ const SCORE_ITEMS = [
 
 function ScoreBar({ label, score }: { label: string; score: number }) {
   const color =
-    score >= 80 ? "bg-green-500" : score >= 60 ? "bg-blue-500" : "bg-orange-400";
+    score >= 80 ? "bg-green-500" : score >= 60 ? "bg-pink-400" : "bg-orange-400";
   return (
     <div className="space-y-1">
       <div className="flex justify-between text-sm">
@@ -115,7 +115,7 @@ export default function FeedbackPage({
   if (loading) {
     return (
       <div className="max-w-2xl mx-auto text-center py-20">
-        <Loader2 className="w-10 h-10 animate-spin text-blue-600 mx-auto mb-4" />
+        <Loader2 className="w-10 h-10 animate-spin text-pink-500 mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">
           {generating ? "AI가 종합 평가를 생성하고 있습니다" : "피드백을 불러오는 중..."}
         </h2>
@@ -150,14 +150,14 @@ export default function FeedbackPage({
       {sessionFeedback && (
         <>
           {/* 종합 점수 카드 */}
-          <Card className="mb-6 border-2 border-blue-100 bg-blue-50">
+          <Card className="mb-6 border-2 border-pink-100 bg-pink-50">
             <CardContent className="pt-6">
               <div className="flex items-center gap-6">
                 <div className="text-center">
-                  <div className="text-5xl font-bold text-blue-700">
+                  <div className="text-5xl font-bold text-pink-600">
                     {Math.round(sessionFeedback.avgTotalScore)}
                   </div>
-                  <div className="text-sm text-blue-600 mt-1">종합 점수</div>
+                  <div className="text-sm text-pink-500 mt-1">종합 점수</div>
                 </div>
                 <div className="flex-1 space-y-3">
                   <ScoreBar label="내용 적절성" score={Math.round(sessionFeedback.avgContentScore)} />
@@ -258,7 +258,7 @@ export default function FeedbackPage({
                       </div>
                       <div className="text-right text-sm">
                         종합:{" "}
-                        <span className="font-bold text-blue-700">
+                        <span className="font-bold text-pink-600">
                           {q.answer.feedback.totalScore}점
                         </span>
                       </div>
@@ -274,9 +274,9 @@ export default function FeedbackPage({
                         <p className="text-xs font-medium text-orange-700 mb-1">개선할 점</p>
                         <p className="text-sm text-orange-800">{q.answer.feedback.improvements}</p>
                       </div>
-                      <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
-                        <p className="text-xs font-medium text-blue-700 mb-1">모범 답변 방향</p>
-                        <p className="text-sm text-blue-800">{q.answer.feedback.modelDirection}</p>
+                      <div className="bg-pink-50 border border-pink-100 rounded-lg p-3">
+                        <p className="text-xs font-medium text-pink-600 mb-1">모범 답변 방향</p>
+                        <p className="text-sm text-pink-700">{q.answer.feedback.modelDirection}</p>
                       </div>
                     </div>
                   </>

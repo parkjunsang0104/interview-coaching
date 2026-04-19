@@ -5,14 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
-import { ArrowLeft, Video, TrendingUp } from "lucide-react";
-
-const SCHOOL_TYPE_LABELS: Record<string, string> = {
-  FOREIGN_LANGUAGE: "외고",
-  INTERNATIONAL: "국제고",
-  AUTONOMOUS: "자사고",
-  SCIENCE_GIFTED: "영재학교",
-};
+import { ArrowLeft, Video, TrendingUp, GraduationCap } from "lucide-react";
+import { SessionTranscript } from "@/components/dashboard/session-transcript";
+import { getSchoolShortName, getSchoolName } from "@/lib/school-data";
 
 export default async function StudentDetailPage({
   params,
@@ -34,7 +29,7 @@ export default async function StudentDetailPage({
     include: {
       sessions: {
         include: {
-          personalStatement: { select: { schoolType: true } },
+          personalStatement: { select: { targetSchool: true } },
           sessionFeedback: {
             select: {
               avgTotalScore: true,
@@ -43,6 +38,28 @@ export default async function StudentDetailPage({
               avgCompletenessScore: true,
               avgExpressionScore: true,
             },
+          },
+          questions: {
+            include: {
+              answer: {
+                select: {
+                  transcript: true,
+                  durationSec: true,
+                  feedback: {
+                    select: {
+                      totalScore: true,
+                      contentScore: true,
+                      logicScore: true,
+                      completenessScore: true,
+                      expressionScore: true,
+                      strengths: true,
+                      improvements: true,
+                    },
+                  },
+                },
+              },
+            },
+            orderBy: { orderIndex: "asc" },
           },
         },
         orderBy: { createdAt: "desc" },
@@ -73,6 +90,13 @@ export default async function StudentDetailPage({
     { label: "표현력", key: "avgExpressionScore" },
   ] as const;
 
+  // 지원학교 집계
+  const schoolCounts = student.sessions.reduce<Record<string, number>>((acc, s) => {
+    const id = s.personalStatement.targetSchool;
+    acc[id] = (acc[id] || 0) + 1;
+    return acc;
+  }, {});
+
   return (
     <div>
       <div className="flex items-center gap-3 mb-8">
@@ -94,8 +118,8 @@ export default async function StudentDetailPage({
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-lg font-bold text-blue-700">
+              <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center">
+                <span className="text-lg font-bold text-pink-600">
                   {student.name.charAt(0)}
                 </span>
               </div>
@@ -136,7 +160,7 @@ export default async function StudentDetailPage({
             </div>
             <div className="flex items-center justify-between text-sm border-t pt-3">
               <span className="text-muted-foreground">평균 종합 점수</span>
-              <span className="text-xl font-bold text-blue-700">
+              <span className="text-xl font-bold text-pink-600">
                 {avgTotal ?? "-"}
               </span>
             </div>
@@ -168,7 +192,7 @@ export default async function StudentDetailPage({
                       </div>
                       <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-blue-500 rounded-full"
+                          className="h-full bg-pink-400 rounded-full"
                           style={{ width: `${avg}%` }}
                         />
                       </div>
@@ -184,6 +208,36 @@ export default async function StudentDetailPage({
         </Card>
       </div>
 
+      {/* 지원학교 */}
+      {Object.keys(schoolCounts).length > 0 && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <GraduationCap className="w-4 h-4" />
+              지원학교
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-3">
+              {Object.entries(schoolCounts).map(([id, count]) => (
+                <div
+                  key={id}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 rounded-lg border border-gray-100"
+                >
+                  <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
+                    <GraduationCap className="w-4 h-4 text-pink-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{getSchoolName(id)}</p>
+                    <p className="text-xs text-muted-foreground">{String(count)}회 면접</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* 면접 기록 목록 */}
       <Card>
         <CardHeader>
@@ -196,35 +250,72 @@ export default async function StudentDetailPage({
             </p>
           ) : (
             <div className="divide-y divide-gray-100">
-              {student.sessions.map((s) => (
-                <div key={s.id} className="flex items-center justify-between py-4">
-                  <div className="flex items-center gap-3">
-                    <Badge variant="outline" className="text-xs">
-                      {SCHOOL_TYPE_LABELS[s.personalStatement.schoolType]}
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">
-                      {new Date(s.createdAt).toLocaleDateString("ko-KR")}
-                    </span>
-                    <Badge
-                      className={`text-xs border-0 ${s.status === "COMPLETED" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}
-                    >
-                      {s.status === "COMPLETED" ? "완료" : s.status}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {s.sessionFeedback && (
-                      <span className="font-bold text-blue-700">
-                        {Math.round(s.sessionFeedback.avgTotalScore)}점
+              {student.sessions.map((s, idx) => (
+                <div key={s.id} className="py-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-muted-foreground font-mono w-6">
+                        #{student.sessions.length - idx}
                       </span>
-                    )}
-                    {s.status === "COMPLETED" && (
-                      <Link href={`/interview/${s.id}/feedback`}>
-                        <Button variant="outline" size="sm" className="text-xs">
-                          결과 보기
-                        </Button>
-                      </Link>
-                    )}
+                      <Badge variant="outline" className="text-xs">
+                        {getSchoolShortName(s.personalStatement.targetSchool)}
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">
+                        {new Date(s.createdAt).toLocaleDateString("ko-KR")}
+                      </span>
+                      <Badge
+                        className={`text-xs border-0 ${s.status === "COMPLETED" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}
+                      >
+                        {s.status === "COMPLETED" ? "완료" : s.status}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {s.sessionFeedback && (
+                        <span className="font-bold text-pink-600">
+                          {Math.round(s.sessionFeedback.avgTotalScore)}점
+                        </span>
+                      )}
+                      {s.status === "COMPLETED" && (
+                        <Link href={`/interview/${s.id}/feedback`}>
+                          <Button variant="outline" size="sm" className="text-xs">
+                            결과 보기
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
                   </div>
+
+                  {/* 대화 대본 (펼치기) */}
+                  {s.questions.length > 0 && (
+                    <div className="mt-2 ml-9">
+                      <SessionTranscript
+                        sessionId={s.id}
+                        questions={s.questions.map((q) => ({
+                          id: q.id,
+                          orderIndex: q.orderIndex,
+                          category: q.category,
+                          text: q.text,
+                          answer: q.answer
+                            ? {
+                                transcript: q.answer.transcript,
+                                durationSec: q.answer.durationSec,
+                                feedback: q.answer.feedback
+                                  ? {
+                                      totalScore: q.answer.feedback.totalScore,
+                                      contentScore: q.answer.feedback.contentScore,
+                                      logicScore: q.answer.feedback.logicScore,
+                                      completenessScore: q.answer.feedback.completenessScore,
+                                      expressionScore: q.answer.feedback.expressionScore,
+                                      strengths: q.answer.feedback.strengths,
+                                      improvements: q.answer.feedback.improvements,
+                                    }
+                                  : null,
+                              }
+                            : null,
+                        }))}
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

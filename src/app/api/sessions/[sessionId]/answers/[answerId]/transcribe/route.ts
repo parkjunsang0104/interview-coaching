@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getObjectBuffer } from "@/lib/s3";
 import { transcribeAudio } from "@/lib/whisper";
+import { isLocalKey, readLocalFile } from "@/lib/local-storage";
 
 export const maxDuration = 60;
 
@@ -33,8 +34,12 @@ export async function POST(
   });
 
   try {
-    const buffer = await getObjectBuffer(answer.videoS3Key);
-    const mimeType = answer.videoS3Key.endsWith(".mp4") ? "video/mp4" : "video/webm";
+    const buffer = isLocalKey(answer.videoS3Key)
+      ? await readLocalFile(answer.videoS3Key)
+      : await getObjectBuffer(answer.videoS3Key);
+    const mimeType = answer.videoS3Key.endsWith(".mp4") ? "video/mp4"
+      : answer.videoS3Key.endsWith(".webm") ? "video/webm"
+      : "audio/webm";
     const result = await transcribeAudio(buffer, mimeType);
 
     await prisma.answer.update({

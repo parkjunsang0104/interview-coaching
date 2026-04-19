@@ -9,7 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -24,41 +26,52 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Plus, Trash2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import {
+  SCHOOLS,
+  SCHOOL_CATEGORY_LABELS,
+  ACTIVITY_CATEGORY_LABELS,
+  type ActivityCategory,
+  type SchoolCategory,
+} from "@/lib/school-data";
 
 interface Activity {
+  category: ActivityCategory;
   title: string;
   description: string;
   period: string;
 }
 
+const CATEGORIES: SchoolCategory[] = ["FOREIGN_LANGUAGE", "INTERNATIONAL", "AUTONOMOUS"];
+
 export default function NewInterviewPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [schoolType, setSchoolType] = useState("");
+  const [targetSchool, setTargetSchool] = useState("");
   const [motivation, setMotivation] = useState("");
-  const [strengths, setStrengths] = useState("");
-  const [weaknesses, setWeaknesses] = useState("");
+  const [character, setCharacter] = useState("");
+  const [selfDirected, setSelfDirected] = useState("");
+  const [futurePlan, setFuturePlan] = useState("");
   const [activities, setActivities] = useState<Activity[]>([
-    { title: "", description: "", period: "" },
+    { category: "CLUB", title: "", description: "", period: "" },
   ]);
 
   function addActivity() {
-    if (activities.length >= 3) return;
-    setActivities([...activities, { title: "", description: "", period: "" }]);
+    if (activities.length >= 5) return;
+    setActivities([...activities, { category: "CLUB", title: "", description: "", period: "" }]);
   }
 
   function removeActivity(idx: number) {
     setActivities(activities.filter((_, i) => i !== idx));
   }
 
-  function updateActivity(idx: number, field: keyof Activity, value: string) {
+  function updateActivity<K extends keyof Activity>(idx: number, field: K, value: Activity[K]) {
     setActivities(activities.map((a, i) => (i === idx ? { ...a, [field]: value } : a)));
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!schoolType) {
-      toast.error("지원 학교 유형을 선택해주세요.");
+    if (!targetSchool) {
+      toast.error("지원 학교를 선택해주세요.");
       return;
     }
 
@@ -68,10 +81,11 @@ export default function NewInterviewPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          schoolType,
+          targetSchool,
           motivation,
-          strengths,
-          weaknesses,
+          character,
+          selfDirected,
+          futurePlan,
           activities,
         }),
       });
@@ -102,8 +116,8 @@ export default function NewInterviewPage() {
       </Link>
       <div className="mb-8">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
-          <span className="font-medium text-blue-600">자기소개서 입력</span>
+          <span className="w-6 h-6 bg-pink-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+          <span className="font-medium text-pink-500">자기소개서 입력</span>
           <span className="text-gray-300">›</span>
           <span>질문 생성</span>
           <span className="text-gray-300">›</span>
@@ -120,20 +134,26 @@ export default function NewInterviewPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">기본 정보</CardTitle>
+            <CardTitle className="text-base">지원 학교</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <Label>지원 학교 유형 *</Label>
-              <Select value={schoolType} onValueChange={(v) => { if (v) setSchoolType(v); }} required>
+              <Label>지원할 학교를 선택하세요 *</Label>
+              <Select value={targetSchool} onValueChange={(v) => { if (v) setTargetSchool(v); }} required>
                 <SelectTrigger>
-                  <SelectValue placeholder="지원하는 학교 유형을 선택하세요" />
+                  <SelectValue placeholder="학교를 선택하세요" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="FOREIGN_LANGUAGE">외국어고등학교 (외고)</SelectItem>
-                  <SelectItem value="INTERNATIONAL">국제고등학교 (국제고)</SelectItem>
-                  <SelectItem value="AUTONOMOUS">자율형사립고 (자사고)</SelectItem>
-                  <SelectItem value="SCIENCE_GIFTED">과학영재학교</SelectItem>
+                <SelectContent className="max-h-80">
+                  {CATEGORIES.map((cat) => (
+                    <SelectGroup key={cat}>
+                      <SelectLabel>{SCHOOL_CATEGORY_LABELS[cat]}</SelectLabel>
+                      {SCHOOLS.filter((s) => s.category === cat).map((s) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.shortName} ({s.region})
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -149,7 +169,19 @@ export default function NewInterviewPage() {
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="motivation">지원 동기 *</Label>
+              <Label htmlFor="selfDirected">1. 자기주도학습 *</Label>
+              <Textarea
+                id="selfDirected"
+                value={selfDirected}
+                onChange={(e) => setSelfDirected(e.target.value)}
+                placeholder="스스로 목표를 세우고 주도적으로 학습한 경험과 그 과정에서 배운 점을 작성해주세요"
+                className="min-h-[100px]"
+                required
+                minLength={10}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="motivation">2. 지원동기 *</Label>
               <Textarea
                 id="motivation"
                 value={motivation}
@@ -161,24 +193,24 @@ export default function NewInterviewPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="strengths">장점 *</Label>
+              <Label htmlFor="futurePlan">3. 입학 후 학업계획 및 졸업 후 계획 *</Label>
               <Textarea
-                id="strengths"
-                value={strengths}
-                onChange={(e) => setStrengths(e.target.value)}
-                placeholder="자신의 강점과 장점을 구체적인 사례와 함께 작성해주세요"
+                id="futurePlan"
+                value={futurePlan}
+                onChange={(e) => setFuturePlan(e.target.value)}
+                placeholder="입학 후 구체적인 학업 계획과 졸업 후 진로·장기 비전을 작성해주세요"
                 className="min-h-[100px]"
                 required
                 minLength={10}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="weaknesses">단점 (극복 과정 포함) *</Label>
+              <Label htmlFor="character">4. 인성 *</Label>
               <Textarea
-                id="weaknesses"
-                value={weaknesses}
-                onChange={(e) => setWeaknesses(e.target.value)}
-                placeholder="단점과 이를 극복하기 위한 노력을 솔직하게 작성해주세요"
+                id="character"
+                value={character}
+                onChange={(e) => setCharacter(e.target.value)}
+                placeholder="배려, 나눔, 협력, 갈등 관리 등 인성을 보여주는 구체적 경험을 작성해주세요"
                 className="min-h-[100px]"
                 required
                 minLength={10}
@@ -190,15 +222,13 @@ export default function NewInterviewPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">주요 활동 및 경험</CardTitle>
-            <CardDescription>최대 3개의 주요 활동을 입력해주세요</CardDescription>
+            <CardDescription>최대 5개의 주요 활동을 입력해주세요</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {activities.map((activity, idx) => (
               <div key={idx} className="space-y-3 p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">
-                    활동 {idx + 1}
-                  </span>
+                  <span className="text-sm font-medium text-gray-700">활동 {idx + 1}</span>
                   {activities.length > 1 && (
                     <Button
                       type="button"
@@ -213,13 +243,22 @@ export default function NewInterviewPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <Label className="text-xs">활동명 *</Label>
-                    <Input
-                      value={activity.title}
-                      onChange={(e) => updateActivity(idx, "title", e.target.value)}
-                      placeholder="예: 교내 영어 토론 대회"
-                      required
-                    />
+                    <Label className="text-xs">활동 유형 *</Label>
+                    <Select
+                      value={activity.category}
+                      onValueChange={(v) => {
+                        if (v) updateActivity(idx, "category", v as ActivityCategory);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(ACTIVITY_CATEGORY_LABELS).map(([k, label]) => (
+                          <SelectItem key={k} value={k}>{label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs">기간 *</Label>
@@ -230,6 +269,15 @@ export default function NewInterviewPage() {
                       required
                     />
                   </div>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">활동명 *</Label>
+                  <Input
+                    value={activity.title}
+                    onChange={(e) => updateActivity(idx, "title", e.target.value)}
+                    placeholder="예: 교내 영어 토론 대회"
+                    required
+                  />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">활동 내용 및 배운 점 *</Label>
@@ -244,7 +292,7 @@ export default function NewInterviewPage() {
                 {idx < activities.length - 1 && <Separator />}
               </div>
             ))}
-            {activities.length < 3 && (
+            {activities.length < 5 && (
               <Button
                 type="button"
                 variant="outline"
@@ -253,7 +301,7 @@ export default function NewInterviewPage() {
                 className="w-full border-dashed"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                활동 추가 ({activities.length}/3)
+                활동 추가 ({activities.length}/5)
               </Button>
             )}
           </CardContent>

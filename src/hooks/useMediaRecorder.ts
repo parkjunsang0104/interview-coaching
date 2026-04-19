@@ -2,14 +2,14 @@
 
 import { useState, useRef, useCallback } from "react";
 
-function getSupportedMimeType(): string {
+function getSupportedAudioMimeType(): string {
   const types = [
-    "video/webm;codecs=vp9,opus",
-    "video/webm;codecs=vp8,opus",
-    "video/webm",
-    "video/mp4",
+    "audio/webm;codecs=opus",
+    "audio/webm",
+    "audio/ogg;codecs=opus",
+    "audio/mp4",
   ];
-  return types.find((t) => MediaRecorder.isTypeSupported(t)) ?? "";
+  return types.find((t) => MediaRecorder.isTypeSupported(t)) ?? "audio/webm";
 }
 
 export function useMediaRecorder(stream: MediaStream | null) {
@@ -29,10 +29,14 @@ export function useMediaRecorder(stream: MediaStream | null) {
     setRecordedBlob(null);
     setDuration(0);
 
-    const type = getSupportedMimeType();
+    // 오디오 트랙만 추출
+    const audioTracks = stream.getAudioTracks();
+    const audioStream = new MediaStream(audioTracks);
+
+    const type = getSupportedAudioMimeType();
     setMimeType(type);
 
-    const recorder = new MediaRecorder(stream, { mimeType: type || undefined });
+    const recorder = new MediaRecorder(audioStream, { mimeType: type || undefined });
     recorderRef.current = recorder;
 
     recorder.ondataavailable = (e) => {
@@ -40,12 +44,12 @@ export function useMediaRecorder(stream: MediaStream | null) {
     };
 
     recorder.onstop = () => {
-      const blob = new Blob(chunksRef.current, { type: type || "video/webm" });
+      const blob = new Blob(chunksRef.current, { type: type || "audio/webm" });
       setRecordedBlob(blob);
       if (timerRef.current) clearInterval(timerRef.current);
     };
 
-    recorder.start(5000); // 5초 청크
+    recorder.start(5000);
     setIsRecording(true);
     startTimeRef.current = Date.now();
 
@@ -65,7 +69,7 @@ export function useMediaRecorder(stream: MediaStream | null) {
       const currentMimeType = mimeType;
 
       recorderRef.current.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: currentMimeType || "video/webm" });
+        const blob = new Blob(chunksRef.current, { type: currentMimeType || "audio/webm" });
         setRecordedBlob(blob);
         setIsRecording(false);
         if (timerRef.current) clearInterval(timerRef.current);

@@ -1,10 +1,13 @@
-import { auth } from "@/lib/auth";
+import NextAuth from "next-auth";
+import { authConfig } from "@/lib/auth.config";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+const { auth } = NextAuth(authConfig);
+
 const PUBLIC_PATHS = ["/login", "/register", "/api/auth"];
 
-export default auth(async function middleware(req: NextRequest & { auth: { user?: { role?: string } } | null }) {
+export default auth(function proxy(req: NextRequest & { auth: { user?: { role?: string } } | null }) {
   const { pathname } = req.nextUrl;
 
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
@@ -34,5 +37,5 @@ export default auth(async function middleware(req: NextRequest & { auth: { user?
 });
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)" ],
 };

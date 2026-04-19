@@ -6,18 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
 import { Video, ChevronRight, Plus } from "lucide-react";
-
-const SCHOOL_TYPE_LABELS: Record<string, string> = {
-  FOREIGN_LANGUAGE: "외고",
-  INTERNATIONAL: "국제고",
-  AUTONOMOUS: "자사고",
-  SCIENCE_GIFTED: "영재학교",
-};
+import { getSchoolShortName } from "@/lib/school-data";
 
 const STATUS_META: Record<string, { label: string; color: string }> = {
   CREATED: { label: "시작 전", color: "bg-gray-100 text-gray-600" },
   QUESTIONS_READY: { label: "질문 준비됨", color: "bg-yellow-100 text-yellow-700" },
-  IN_PROGRESS: { label: "진행 중", color: "bg-blue-100 text-blue-700" },
+  IN_PROGRESS: { label: "진행 중", color: "bg-pink-100 text-pink-600" },
   PROCESSING: { label: "분석 중", color: "bg-purple-100 text-purple-700" },
   COMPLETED: { label: "완료", color: "bg-green-100 text-green-700" },
   FAILED: { label: "실패", color: "bg-red-100 text-red-700" },
@@ -30,7 +24,7 @@ export default async function StudentSessionsPage() {
   const sessions = await prisma.interviewSession.findMany({
     where: { userId: session.user.id },
     include: {
-      personalStatement: { select: { schoolType: true } },
+      personalStatement: { select: { targetSchool: true } },
       sessionFeedback: {
         select: {
           avgTotalScore: true,
@@ -88,13 +82,13 @@ export default async function StudentSessionsPage() {
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
-                        <Video className="w-5 h-5 text-blue-600" />
+                      <div className="w-10 h-10 bg-pink-50 rounded-lg flex items-center justify-center shrink-0">
+                        <Video className="w-5 h-5 text-pink-500" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <Badge variant="outline" className="text-xs">
-                            {SCHOOL_TYPE_LABELS[s.personalStatement.schoolType]}
+                            {getSchoolShortName(s.personalStatement.targetSchool)}
                           </Badge>
                           <Badge className={`text-xs border-0 ${meta.color}`}>
                             {meta.label}
@@ -118,7 +112,7 @@ export default async function StudentSessionsPage() {
                     <div className="flex items-center gap-4">
                       {score !== null && (
                         <div className="text-right">
-                          <p className="text-2xl font-bold text-blue-700">{score}</p>
+                          <p className="text-2xl font-bold text-pink-600">{score}</p>
                           <p className="text-xs text-muted-foreground">종합 점수</p>
                         </div>
                       )}
