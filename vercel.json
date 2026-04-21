@@ -1,16 +1,4 @@
 {
   "framework": "nextjs",
-  "buildCommand": "prisma generate && next build",
-  "env": {
-    "DATABASE_URL": "@database_url",
-    "AUTH_SECRET": "@auth_secret",
-    "AUTH_URL": "@auth_url",
-    "ANTHROPIC_API_KEY": "@anthropic_api_key",
-    "OPENAI_API_KEY": "@openai_api_key",
-    "AWS_ACCESS_KEY_ID": "@aws_access_key_id",
-    "AWS_SECRET_ACCESS_KEY": "@aws_secret_access_key",
-    "AWS_REGION": "@aws_region",
-    "AWS_S3_BUCKET": "@aws_s3_bucket",
-    "APP_ENV": "@app_env"
-  }
+  "buildCommand": "prisma generate && next build"
 }
