@@ -3,7 +3,13 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let _openai: OpenAI | null = null;
+function getClient(): OpenAI {
+  if (!_openai) {
+    _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  }
+  return _openai;
+}
 
 export async function transcribeAudio(
   audioBuffer: Buffer,
@@ -16,7 +22,7 @@ export async function transcribeAudio(
     fs.writeFileSync(tmpPath, audioBuffer);
     const file = fs.createReadStream(tmpPath);
 
-    const transcription = await openai.audio.transcriptions.create({
+    const transcription = await getClient().audio.transcriptions.create({
       file,
       model: "whisper-1",
       language: "ko",

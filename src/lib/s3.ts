@@ -6,15 +6,24 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-const s3 = new S3Client({
-  region: process.env.AWS_REGION ?? "ap-northeast-2",
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
+let _s3: S3Client | null = null;
+function getClient(): S3Client {
+  if (!_s3) {
+    _s3 = new S3Client({
+      region: process.env.AWS_REGION ?? "ap-northeast-2",
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? "",
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? "",
+      },
+    });
+  }
+  return _s3;
+}
 
-const BUCKET = process.env.AWS_S3_BUCKET!;
+function bucket() {
+  return process.env.AWS_S3_BUCKET ?? "";
+}
+
 const ENV = process.env.APP_ENV ?? "development";
 
 export function buildS3Key(params: {
@@ -33,25 +42,25 @@ export async function getPresignedUploadUrl(
   contentType: string
 ): Promise<string> {
   const command = new PutObjectCommand({
-    Bucket: BUCKET,
+    Bucket: bucket(),
     Key: s3Key,
     ContentType: contentType,
   });
-  return getSignedUrl(s3, command, { expiresIn: 3600 });
+  return getSignedUrl(getClient(), command, { expiresIn: 3600 });
 }
 
 export async function getPresignedDownloadUrl(s3Key: string): Promise<string> {
-  const command = new GetObjectCommand({ Bucket: BUCKET, Key: s3Key });
-  return getSignedUrl(s3, command, { expiresIn: 900 });
+  const command = new GetObjectCommand({ Bucket: bucket(), Key: s3Key });
+  return getSignedUrl(getClient(), command, { expiresIn: 900 });
 }
 
 export async function deleteObject(s3Key: string): Promise<void> {
-  await s3.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: s3Key }));
+  await getClient().send(new DeleteObjectCommand({ Bucket: bucket(), Key: s3Key }));
 }
 
 export async function getObjectBuffer(s3Key: string): Promise<Buffer> {
-  const response = await s3.send(
-    new GetObjectCommand({ Bucket: BUCKET, Key: s3Key })
+  const response = await getClient().send(
+    new GetObjectCommand({ Bucket: bucket(), Key: s3Key })
   );
   const stream = response.Body as NodeJS.ReadableStream;
   const chunks: Buffer[] = [];

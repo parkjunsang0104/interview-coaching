@@ -1,7 +1,13 @@
 import OpenAI from "openai";
 import { getSchoolById, getSchoolCategoryLabel, getSchoolName } from "@/lib/school-data";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let _openai: OpenAI | null = null;
+function getClient(): OpenAI {
+  if (!_openai) {
+    _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  }
+  return _openai;
+}
 
 const MODEL = "gpt-4o-mini";
 
@@ -59,7 +65,7 @@ export async function generateQuestions(params: {
     .map((a, i) => `  ${i + 1}. ${a.title} (${a.period}): ${a.description}`)
     .join("\n");
 
-  const res = await openai.chat.completions.create({
+  const res = await getClient().chat.completions.create({
     model: MODEL,
     response_format: { type: "json_object" },
     messages: [
@@ -118,7 +124,7 @@ export async function generateAnswerFeedback(params: {
 }): Promise<AnswerFeedbackResult> {
   const schoolLabel = schoolContext(params.targetSchool);
 
-  const res = await openai.chat.completions.create({
+  const res = await getClient().chat.completions.create({
     model: MODEL,
     response_format: { type: "json_object" },
     messages: [
@@ -176,7 +182,7 @@ export async function generateSessionSummary(
     .map((qa, i) => `Q${i + 1}: ${qa.question}\nA${i + 1}: ${qa.transcript || "(답변 없음)"}\n점수: ${qa.totalScore}`)
     .join("\n\n");
 
-  const res = await openai.chat.completions.create({
+  const res = await getClient().chat.completions.create({
     model: MODEL,
     response_format: { type: "json_object" },
     messages: [
