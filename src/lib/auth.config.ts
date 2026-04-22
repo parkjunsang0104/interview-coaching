@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
+import type { UserRole } from "@/generated/prisma/client";
 
 export const authConfig: NextAuthConfig = {
   session: { strategy: "jwt" },
@@ -17,7 +18,7 @@ export const authConfig: NextAuthConfig = {
     session({ session, token }) {
       if (session.user) {
         session.user.id = token.sub!;
-        session.user.role = token.role as string;
+        session.user.role = token.role as UserRole;
         session.user.academyId = token.academyId as string | null;
       }
       return session;

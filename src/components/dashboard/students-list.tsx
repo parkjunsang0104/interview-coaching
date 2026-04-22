@@ -261,15 +261,11 @@ export function StudentsList({ students }: { students: StudentRow[] }) {
                 </Link>
 
                 <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50"
-                      disabled={deletingId === s.id}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                  <AlertDialogTrigger
+                    disabled={deletingId === s.id}
+                    className="inline-flex items-center justify-center h-8 w-8 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                  >
+                    <Trash2 className="w-4 h-4" />
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
