@@ -9,18 +9,15 @@ export const authConfig: NextAuthConfig = {
   },
   providers: [],
   callbacks: {
-    jwt({ token, user }) {
-      if (user) {
-        token.role = (user as { role?: string }).role;
-        token.academyId = (user as { academyId?: string | null }).academyId;
-      }
-      return token;
-    },
     session({ session, token }) {
       if (session.user) {
         session.user.id = token.sub!;
         session.user.role = token.role as UserRole;
-        session.user.academyId = token.academyId as string | null;
+        session.user.academyId = (token.academyId as string | null) ?? null;
+        (session.user as { isIndividual?: boolean }).isIndividual =
+          Boolean(token.isIndividual);
+        (session.user as { onboarded?: boolean }).onboarded =
+          Boolean(token.onboarded);
       }
       return session;
     },

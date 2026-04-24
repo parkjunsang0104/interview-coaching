@@ -32,11 +32,11 @@ export function DashboardCharts({ data }: { data: ChartData[] }) {
           formatter={(value) => [typeof value === "number" ? `${value}점` : String(value)]}
         />
         <Legend wrapperStyle={{ fontSize: 12 }} />
-        <Line type="monotone" dataKey="종합" stroke="#ec4899" strokeWidth={2.5} dot={{ r: 4 }} />
-        <Line type="monotone" dataKey="내용" stroke="#f472b6" strokeWidth={1.5} strokeDasharray="4 2" dot={false} />
-        <Line type="monotone" dataKey="논리" stroke="#c084fc" strokeWidth={1.5} strokeDasharray="4 2" dot={false} />
-        <Line type="monotone" dataKey="완성도" stroke="#fb923c" strokeWidth={1.5} strokeDasharray="4 2" dot={false} />
-        <Line type="monotone" dataKey="표현력" stroke="#e879f9" strokeWidth={1.5} strokeDasharray="4 2" dot={false} />
+        <Line type="monotone" dataKey="종합" stroke="#B40023" strokeWidth={2.5} dot={{ r: 4 }} />
+        <Line type="monotone" dataKey="내용" stroke="#8a4a2c" strokeWidth={1.5} strokeDasharray="4 2" dot={false} />
+        <Line type="monotone" dataKey="논리" stroke="#c17a39" strokeWidth={1.5} strokeDasharray="4 2" dot={false} />
+        <Line type="monotone" dataKey="완성도" stroke="#d97757" strokeWidth={1.5} strokeDasharray="4 2" dot={false} />
+        <Line type="monotone" dataKey="표현력" stroke="#7a3b24" strokeWidth={1.5} strokeDasharray="4 2" dot={false} />
       </LineChart>
     </ResponsiveContainer>
   );

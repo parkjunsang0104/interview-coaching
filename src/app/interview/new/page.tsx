@@ -116,8 +116,8 @@ export default function NewInterviewPage() {
       </Link>
       <div className="mb-8">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <span className="w-6 h-6 bg-pink-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
-          <span className="font-medium text-pink-500">자기소개서 입력</span>
+          <span className="w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+          <span className="font-medium text-red-500">자기소개서 입력</span>
           <span className="text-gray-300">›</span>
           <span>질문 생성</span>
           <span className="text-gray-300">›</span>

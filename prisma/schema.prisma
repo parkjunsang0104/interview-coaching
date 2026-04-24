@@ -65,15 +65,18 @@ model Academy {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  name         String
-  middleSchool String?
-  role         UserRole @default(STUDENT)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String?
+  name          String
+  image         String?
+  middleSchool  String?
+  role          UserRole @default(STUDENT)
+  isActive      Boolean  @default(true)
+  isIndividual  Boolean  @default(false)
+  onboarded     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   academyId String?
   academy   Academy? @relation(fields: [academyId], references: [id])

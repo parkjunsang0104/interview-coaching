@@ -118,8 +118,8 @@ export default async function StudentDetailPage({
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center">
-                <span className="text-lg font-bold text-pink-600">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <span className="text-lg font-bold text-red-600">
                   {student.name.charAt(0)}
                 </span>
               </div>
@@ -160,7 +160,7 @@ export default async function StudentDetailPage({
             </div>
             <div className="flex items-center justify-between text-sm border-t pt-3">
               <span className="text-muted-foreground">평균 종합 점수</span>
-              <span className="text-xl font-bold text-pink-600">
+              <span className="text-xl font-bold text-red-600">
                 {avgTotal ?? "-"}
               </span>
             </div>
@@ -192,7 +192,7 @@ export default async function StudentDetailPage({
                       </div>
                       <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-pink-400 rounded-full"
+                          className="h-full bg-red-400 rounded-full"
                           style={{ width: `${avg}%` }}
                         />
                       </div>
@@ -224,8 +224,8 @@ export default async function StudentDetailPage({
                   key={id}
                   className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 rounded-lg border border-gray-100"
                 >
-                  <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
-                    <GraduationCap className="w-4 h-4 text-pink-500" />
+                  <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                    <GraduationCap className="w-4 h-4 text-red-500" />
                   </div>
                   <div>
                     <p className="text-sm font-medium">{getSchoolName(id)}</p>
@@ -271,7 +271,7 @@ export default async function StudentDetailPage({
                     </div>
                     <div className="flex items-center gap-3">
                       {s.sessionFeedback && (
-                        <span className="font-bold text-pink-600">
+                        <span className="font-bold text-red-600">
                           {Math.round(s.sessionFeedback.avgTotalScore)}점
                         </span>
                       )}

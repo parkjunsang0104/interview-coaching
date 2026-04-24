@@ -11,7 +11,7 @@ import { getSchoolShortName } from "@/lib/school-data";
 const STATUS_META: Record<string, { label: string; color: string }> = {
   CREATED: { label: "시작 전", color: "bg-gray-100 text-gray-600" },
   QUESTIONS_READY: { label: "질문 준비됨", color: "bg-yellow-100 text-yellow-700" },
-  IN_PROGRESS: { label: "진행 중", color: "bg-pink-100 text-pink-600" },
+  IN_PROGRESS: { label: "진행 중", color: "bg-red-100 text-red-600" },
   PROCESSING: { label: "분석 중", color: "bg-purple-100 text-purple-700" },
   COMPLETED: { label: "완료", color: "bg-green-100 text-green-700" },
   FAILED: { label: "실패", color: "bg-red-100 text-red-700" },
@@ -82,8 +82,8 @@ export default async function StudentSessionsPage() {
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-pink-50 rounded-lg flex items-center justify-center shrink-0">
-                        <Video className="w-5 h-5 text-pink-500" />
+                      <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center shrink-0">
+                        <Video className="w-5 h-5 text-red-500" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-1">
@@ -112,7 +112,7 @@ export default async function StudentSessionsPage() {
                     <div className="flex items-center gap-4">
                       {score !== null && (
                         <div className="text-right">
-                          <p className="text-2xl font-bold text-pink-600">{score}</p>
+                          <p className="text-2xl font-bold text-red-600">{score}</p>
                           <p className="text-xs text-muted-foreground">종합 점수</p>
                         </div>
                       )}

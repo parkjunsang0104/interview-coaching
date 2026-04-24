@@ -75,8 +75,8 @@ export default async function TeacherDashboardPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
-                <Users className="w-5 h-5 text-pink-500" />
+              <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                <Users className="w-5 h-5 text-red-500" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{studentCount}</p>
@@ -144,7 +144,7 @@ export default async function TeacherDashboardPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       {s.sessionFeedback && (
-                        <span className="text-sm font-bold text-pink-600">
+                        <span className="text-sm font-bold text-red-600">
                           {Math.round(s.sessionFeedback.avgTotalScore)}점
                         </span>
                       )}

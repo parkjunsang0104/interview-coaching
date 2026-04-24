@@ -1,12 +1,20 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Asap, Faster_One } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { SessionProvider } from "next-auth/react";
 
-const geist = Geist({
-  variable: "--font-geist-sans",
+const asap = Asap({
+  variable: "--font-asap",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const fasterOne = Faster_One({
+  variable: "--font-faster-one",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -20,8 +28,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={`${geist.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
+    <html lang="ko" className={`${asap.variable} ${fasterOne.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col font-[family-name:var(--font-asap)]">
         <SessionProvider>
           {children}
         </SessionProvider>

@@ -65,18 +65,18 @@ export default async function TeacherStudentsPage() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-8">
-        <div className="w-11 h-11 bg-gradient-to-br from-pink-400 to-rose-500 rounded-2xl flex items-center justify-center shadow-sm">
+        <div className="w-11 h-11 bg-gradient-to-br from-red-400 to-red-500 rounded-2xl flex items-center justify-center shadow-sm">
           <Users className="w-5 h-5 text-white" />
         </div>
         <div>
           <h1 className="text-2xl font-bold text-gray-800">학생 관리</h1>
-          <p className="text-sm text-pink-500 mt-0.5">
+          <p className="text-sm text-red-500 mt-0.5">
             총 {rows.length}명의 학생이 등록되어 있습니다
           </p>
         </div>
       </div>
 
-      <Card className="border-pink-100/50 shadow-sm">
+      <Card className="border-red-100/50 shadow-sm">
         <CardHeader>
           <CardTitle className="text-base">학생 목록</CardTitle>
         </CardHeader>

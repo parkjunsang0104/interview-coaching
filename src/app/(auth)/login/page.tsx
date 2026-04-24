@@ -1,12 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -14,84 +10,60 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { toast } from "sonner";
+import { Sparkles } from "lucide-react";
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
-    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
-
-    setLoading(true);
-    try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        toast.error("이메일 또는 비밀번호가 올바르지 않습니다.");
-        return;
-      }
-
-      router.push("/");
-      router.refresh();
-    } catch {
-      toast.error("로그인 중 오류가 발생했습니다.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
   return (
-    <Card className="shadow-lg">
+    <Card className="shadow-lg border-[#E8DFC4]">
       <CardHeader className="text-center space-y-2">
-        <div className="mx-auto w-12 h-12 bg-pink-500 rounded-xl flex items-center justify-center mb-2">
-          <span className="text-white text-xl font-bold">면</span>
+        <div className="mx-auto w-12 h-12 bg-[#B40023] rounded-xl flex items-center justify-center mb-2">
+          <Sparkles className="w-6 h-6 text-[#FCF0D6]" />
         </div>
-        <CardTitle className="text-2xl">로그인</CardTitle>
-        <CardDescription>면접 코칭 프로그램에 오신 것을 환영합니다</CardDescription>
+        <CardTitle className="text-2xl text-gray-800">로그인</CardTitle>
+        <CardDescription className="text-gray-600">
+          구글 계정으로 빠르게 로그인하세요
+        </CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">이메일</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="example@email.com"
-              required
-              autoComplete="email"
-            />
+      <CardContent className="space-y-4">
+        <Button
+          type="button"
+          onClick={() => signIn("google", { callbackUrl: "/" })}
+          className="w-full h-12 bg-white border border-[#E8DFC4] text-gray-800 hover:bg-[#FCF0D6] hover:border-[#B40023]/30 shadow-sm"
+        >
+          <GoogleIcon />
+          <span className="ml-2 font-medium">Google 계정으로 로그인</span>
+        </Button>
+
+        <div className="relative py-1">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-[#E8DFC4]" />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">비밀번호</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="비밀번호를 입력하세요"
-              required
-              autoComplete="current-password"
-            />
+          <div className="relative flex justify-center text-xs">
+            <span className="bg-white px-2 text-gray-500">처음이신가요?</span>
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "로그인 중..." : "로그인"}
+        </div>
+
+        <Link href="/register" className="block">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full h-11 border-[#B40023] text-[#B40023] hover:bg-[#FCF0D6]"
+          >
+            회원가입 하러가기
           </Button>
-        </form>
-        <p className="text-center text-sm text-muted-foreground mt-4">
-          계정이 없으신가요?{" "}
-          <Link href="/register" className="text-pink-500 hover:underline font-medium">
-            회원가입
-          </Link>
-        </p>
+        </Link>
       </CardContent>
     </Card>
+  );
+}
+
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4" />
+      <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853" />
+      <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05" />
+      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335" />
+    </svg>
   );
 }

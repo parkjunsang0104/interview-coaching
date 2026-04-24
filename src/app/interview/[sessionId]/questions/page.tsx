@@ -19,7 +19,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  MOTIVATION: "bg-pink-100 text-pink-600",
+  MOTIVATION: "bg-red-100 text-red-600",
   CHARACTER: "bg-green-100 text-green-700",
   ACTIVITY: "bg-yellow-100 text-yellow-700",
   FUTURE_PLAN: "bg-purple-100 text-purple-700",
@@ -77,7 +77,7 @@ export default function QuestionsPage({
   if (loading) {
     return (
       <div className="max-w-2xl mx-auto text-center py-20">
-        <Loader2 className="w-10 h-10 animate-spin text-pink-500 mx-auto mb-4" />
+        <Loader2 className="w-10 h-10 animate-spin text-red-500 mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">AI가 면접 질문을 생성하고 있습니다</h2>
         <p className="text-muted-foreground">자기소개서를 분석하여 맞춤 질문을 만드는 중입니다...</p>
       </div>
@@ -98,8 +98,8 @@ export default function QuestionsPage({
           <span className="w-6 h-6 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center text-xs font-bold">1</span>
           <span className="text-gray-400">자기소개서 입력</span>
           <span className="text-gray-300">›</span>
-          <span className="w-6 h-6 bg-pink-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
-          <span className="font-medium text-pink-500">질문 확인</span>
+          <span className="w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+          <span className="font-medium text-red-500">질문 확인</span>
           <span className="text-gray-300">›</span>
           <span>면접 진행</span>
           <span className="text-gray-300">›</span>
@@ -143,9 +143,9 @@ export default function QuestionsPage({
         ))}
       </div>
 
-      <div className="bg-pink-50 border border-pink-200 rounded-lg p-4 mb-6 text-sm text-pink-700">
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-sm text-red-700">
         <p className="font-medium mb-1">면접 시작 전 안내</p>
-        <ul className="space-y-1 text-pink-600 text-xs">
+        <ul className="space-y-1 text-red-600 text-xs">
           <li>• 카메라와 마이크 사용 권한이 필요합니다</li>
           <li>• 각 질문에 1~3분 이내로 답변하세요</li>
           <li>• 조용하고 밝은 장소에서 진행하세요</li>

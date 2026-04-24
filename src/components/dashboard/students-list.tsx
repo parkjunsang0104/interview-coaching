@@ -129,19 +129,19 @@ export function StudentsList({ students }: { students: StudentRow[] }) {
       {/* 필터 & 정렬 바 */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-300" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-300" />
           <Input
             placeholder="이름 또는 이메일 검색..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="pl-9 border-pink-100 focus-visible:ring-pink-300"
+            className="pl-9 border-red-100 focus-visible:ring-red-300"
           />
         </div>
 
         <div className="flex gap-2">
           <Select value={sortKey} onValueChange={(v) => { if (v) setSortKey(v as SortKey); }}>
-            <SelectTrigger className="w-44 border-pink-100">
-              <ArrowUpDown className="w-3.5 h-3.5 mr-1 text-pink-400" />
+            <SelectTrigger className="w-44 border-red-100">
+              <ArrowUpDown className="w-3.5 h-3.5 mr-1 text-red-400" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -157,7 +157,7 @@ export function StudentsList({ students }: { students: StudentRow[] }) {
             variant="outline"
             size="icon"
             onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
-            className="border-pink-100 text-pink-500 hover:bg-pink-50"
+            className="border-red-100 text-red-500 hover:bg-red-50"
             title={sortDir === "asc" ? "오름차순" : "내림차순"}
           >
             {sortDir === "asc" ? (
@@ -171,7 +171,7 @@ export function StudentsList({ students }: { students: StudentRow[] }) {
 
       {/* 결과 개수 */}
       <div className="flex items-center gap-2 text-xs text-muted-foreground px-1">
-        <Users className="w-3.5 h-3.5 text-pink-400" />
+        <Users className="w-3.5 h-3.5 text-red-400" />
         <span>
           {filtered.length}명
           {query && ` (전체 ${students.length}명 중)`}
@@ -180,8 +180,8 @@ export function StudentsList({ students }: { students: StudentRow[] }) {
 
       {/* 학생 목록 */}
       {filtered.length === 0 ? (
-        <div className="text-center py-12 bg-pink-50/30 rounded-xl border border-dashed border-pink-200">
-          <Users className="w-10 h-10 mx-auto mb-3 text-pink-300" />
+        <div className="text-center py-12 bg-red-50/30 rounded-xl border border-dashed border-red-200">
+          <Users className="w-10 h-10 mx-auto mb-3 text-red-300" />
           <p className="text-sm text-muted-foreground">
             {query ? "검색 결과가 없습니다" : "등록된 학생이 없습니다"}
           </p>
@@ -191,11 +191,11 @@ export function StudentsList({ students }: { students: StudentRow[] }) {
           {filtered.map((s) => (
             <div
               key={s.id}
-              className="group flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-pink-200 hover:bg-pink-50/30 transition-all"
+              className="group flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-red-200 hover:bg-red-50/30 transition-all"
             >
               {/* 아바타 */}
-              <div className="w-11 h-11 bg-gradient-to-br from-pink-100 to-rose-100 rounded-full flex items-center justify-center shrink-0">
-                <span className="text-sm font-bold text-pink-700">
+              <div className="w-11 h-11 bg-gradient-to-br from-red-100 to-red-100 rounded-full flex items-center justify-center shrink-0">
+                <span className="text-sm font-bold text-red-700">
                   {s.name.charAt(0)}
                 </span>
               </div>
@@ -228,7 +228,7 @@ export function StudentsList({ students }: { students: StudentRow[] }) {
                   <p className="text-[10px] text-muted-foreground">총 면접</p>
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-pink-600">
+                  <p className="text-lg font-bold text-red-600">
                     {s.avgScore !== null ? s.avgScore : "-"}
                   </p>
                   <p className="text-[10px] text-muted-foreground">평균</p>
@@ -254,7 +254,7 @@ export function StudentsList({ students }: { students: StudentRow[] }) {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-xs border-pink-200 text-pink-600 hover:bg-pink-50"
+                    className="text-xs border-red-200 text-red-600 hover:bg-red-50"
                   >
                     상세
                   </Button>

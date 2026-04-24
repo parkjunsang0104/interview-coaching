@@ -174,10 +174,10 @@ export default function TeacherNewInterviewPage() {
           </CardHeader>
           <CardContent>
             {selectedStudent ? (
-              <div className="flex items-center justify-between p-3 bg-pink-50 rounded-lg border border-pink-200">
+              <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-pink-100 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-bold text-pink-600">
+                  <div className="w-9 h-9 bg-red-100 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-bold text-red-600">
                       {selectedStudent.name.charAt(0)}
                     </span>
                   </div>
@@ -185,7 +185,7 @@ export default function TeacherNewInterviewPage() {
                     <p className="font-medium text-sm">{selectedStudent.name}</p>
                     <p className="text-xs text-muted-foreground">{selectedStudent.email}</p>
                   </div>
-                  <CheckCircle2 className="w-4 h-4 text-pink-500" />
+                  <CheckCircle2 className="w-4 h-4 text-red-500" />
                 </div>
                 <Button
                   type="button"

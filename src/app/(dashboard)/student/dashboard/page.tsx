@@ -13,7 +13,7 @@ import { getSchoolShortName } from "@/lib/school-data";
 const STATUS_META: Record<string, { label: string; color: string }> = {
   CREATED: { label: "시작 전", color: "bg-gray-100 text-gray-600" },
   QUESTIONS_READY: { label: "질문 준비", color: "bg-yellow-100 text-yellow-700" },
-  IN_PROGRESS: { label: "진행 중", color: "bg-pink-100 text-pink-600" },
+  IN_PROGRESS: { label: "진행 중", color: "bg-red-100 text-red-600" },
   PROCESSING: { label: "분석 중", color: "bg-purple-100 text-purple-700" },
   COMPLETED: { label: "완료", color: "bg-green-100 text-green-700" },
   FAILED: { label: "실패", color: "bg-red-100 text-red-700" },
@@ -73,18 +73,18 @@ export default async function StudentDashboardPage() {
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 bg-gradient-to-br from-pink-400 to-rose-500 rounded-2xl flex items-center justify-center shadow-sm">
+          <div className="w-11 h-11 bg-gradient-to-br from-red-400 to-red-500 rounded-2xl flex items-center justify-center shadow-sm">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-800">
               안녕하세요, {session.user.name}님!
             </h1>
-            <p className="text-sm text-pink-500 mt-0.5">오늘도 멋진 하루 보내세요 ✨</p>
+            <p className="text-sm text-red-500 mt-0.5">오늘도 멋진 하루 보내세요 ✨</p>
           </div>
         </div>
         <Link href="/interview/new">
-          <Button className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-md shadow-pink-200/50 h-11 px-5">
+          <Button className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-500 hover:from-red-600 hover:to-red-600 shadow-md shadow-red-200/50 h-11 px-5">
             <Video className="w-4 h-4" />
             새 면접 시작
           </Button>
@@ -101,11 +101,11 @@ export default async function StudentDashboardPage() {
 
       {/* 점수 추이 차트 */}
       {scoreHistory.length > 0 ? (
-        <Card className="mb-8 border-pink-100/50 shadow-sm">
+        <Card className="mb-8 border-red-100/50 shadow-sm">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
-                <Video className="w-4 h-4 text-pink-500" />
+              <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                <Video className="w-4 h-4 text-red-500" />
               </div>
               점수 추이
             </CardTitle>
@@ -115,29 +115,29 @@ export default async function StudentDashboardPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card className="mb-8 border-dashed border-pink-200 bg-pink-50/30">
+        <Card className="mb-8 border-dashed border-red-200 bg-red-50/30">
           <CardContent className="py-12 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 bg-pink-100 rounded-full flex items-center justify-center">
-              <Video className="w-8 h-8 text-pink-400" />
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+              <Video className="w-8 h-8 text-red-400" />
             </div>
             <p className="text-gray-700 font-medium">아직 완료된 면접이 없습니다</p>
-            <p className="text-sm text-pink-500 mt-1">첫 번째 면접을 시작해보세요!</p>
+            <p className="text-sm text-red-500 mt-1">첫 번째 면접을 시작해보세요!</p>
           </CardContent>
         </Card>
       )}
 
       {/* 4번 항목: 이전/최근 면접 기록 History */}
-      <Card className="border-pink-100/50 shadow-sm">
+      <Card className="border-red-100/50 shadow-sm">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-base flex items-center gap-2">
-              <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
-                <History className="w-4 h-4 text-pink-500" />
+              <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                <History className="w-4 h-4 text-red-500" />
               </div>
               면접 기록 History
             </CardTitle>
             <Link href="/student/sessions">
-              <Button variant="ghost" size="sm" className="text-pink-500 hover:text-pink-600 hover:bg-pink-50 text-xs gap-1">
+              <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600 hover:bg-red-50 text-xs gap-1">
                 전체 보기 <ChevronRight className="w-3 h-3" />
               </Button>
             </Link>
@@ -146,7 +146,7 @@ export default async function StudentDashboardPage() {
         <CardContent>
           {recentSessions.length === 0 ? (
             <div className="text-center py-8">
-              <Calendar className="w-10 h-10 mx-auto mb-3 text-pink-200" />
+              <Calendar className="w-10 h-10 mx-auto mb-3 text-red-200" />
               <p className="text-sm text-muted-foreground">면접 기록이 없습니다</p>
             </div>
           ) : (
@@ -161,11 +161,11 @@ export default async function StudentDashboardPage() {
                 return (
                   <div
                     key={s.id}
-                    className="group flex items-center gap-4 p-3.5 rounded-xl border border-gray-100 hover:border-pink-200 hover:bg-pink-50/30 transition-all"
+                    className="group flex items-center gap-4 p-3.5 rounded-xl border border-gray-100 hover:border-red-200 hover:bg-red-50/30 transition-all"
                   >
                     {/* 회차 */}
                     <div className="flex flex-col items-center gap-0.5 shrink-0">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-100 to-rose-100 flex items-center justify-center text-pink-700 font-bold text-sm">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-100 to-red-100 flex items-center justify-center text-red-700 font-bold text-sm">
                         {recentSessions.length - idx}
                       </div>
                       <span className="text-[10px] text-gray-400">회차</span>
@@ -199,7 +199,7 @@ export default async function StudentDashboardPage() {
                     {/* 점수 */}
                     {score !== null && (
                       <div className="text-right shrink-0">
-                        <p className="text-2xl font-bold text-pink-600 leading-none">
+                        <p className="text-2xl font-bold text-red-600 leading-none">
                           {score}
                         </p>
                         <p className="text-[10px] text-muted-foreground mt-0.5">종합 점수</p>
@@ -213,7 +213,7 @@ export default async function StudentDashboardPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="text-xs border-pink-200 text-pink-600 hover:bg-pink-50 hover:border-pink-300"
+                            className="text-xs border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
                           >
                             결과 <ChevronRight className="w-3 h-3 ml-0.5" />
                           </Button>

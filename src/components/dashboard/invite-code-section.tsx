@@ -39,7 +39,7 @@ export function InviteCodeSection({ academyId }: { academyId: string }) {
     <Card>
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
-          <KeyRound className="w-4 h-4 text-pink-500" />
+          <KeyRound className="w-4 h-4 text-red-500" />
           학원 코드
         </CardTitle>
         <CardDescription>
@@ -47,12 +47,12 @@ export function InviteCodeSection({ academyId }: { academyId: string }) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl border border-pink-100">
+        <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-red-50 to-red-50 rounded-xl border border-red-100">
           <div className="flex-1">
-            <p className="text-[11px] text-pink-500 font-medium uppercase tracking-wider mb-1">
+            <p className="text-[11px] text-red-500 font-medium uppercase tracking-wider mb-1">
               학원 고유 코드
             </p>
-            <p className="text-2xl font-mono font-bold text-pink-700 tracking-widest">
+            <p className="text-2xl font-mono font-bold text-red-700 tracking-widest">
               {code || "—"}
             </p>
           </div>
@@ -61,7 +61,7 @@ export function InviteCodeSection({ academyId }: { academyId: string }) {
             disabled={!code}
             variant="outline"
             size="sm"
-            className="shrink-0 bg-white border-pink-200 text-pink-600 hover:bg-pink-50"
+            className="shrink-0 bg-white border-red-200 text-red-600 hover:bg-red-50"
           >
             {copied ? (
               <>
@@ -81,7 +81,7 @@ export function InviteCodeSection({ academyId }: { academyId: string }) {
           <p className="font-medium text-gray-700 mb-1">학생 가입 안내 방법</p>
           <ol className="space-y-1 list-decimal list-inside">
             <li>학생에게 이 코드를 공유합니다</li>
-            <li>학생이 <span className="font-mono text-pink-600">/register</span> 페이지에서 코드와 함께 가입</li>
+            <li>학생이 <span className="font-mono text-red-600">/register</span> 페이지에서 코드와 함께 가입</li>
             <li>자동으로 학원 소속 학생으로 등록됨</li>
           </ol>
         </div>
